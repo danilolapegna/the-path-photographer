@@ -1,6 +1,7 @@
 package com.komoot.test.viewmodel
 
 import com.komoot.test.api.BaseFlickrApi
+import com.komoot.test.client.BaseFlickrApiClient
 import com.komoot.test.model.FlickrPhotoResponse
 import com.komoot.test.util.FlickrUrlGenerator.generateUrlForPhoto
 import io.reactivex.Single
@@ -17,7 +18,9 @@ class FlickrPhotoViewModel(val flickrPhotoRepository: FlickrPhotoRepository) {
     }
 }
 
-class FlickrPhotoRepository(private val flickrPhotoApi: BaseFlickrApi) {
+object FlickrPhotoRepository {
+
+    private val flickrPhotoApi: BaseFlickrApi by lazy { BaseFlickrApiClient().getFlickrService() }
 
     fun getPhotoByCoordinates(
         lat: Float,

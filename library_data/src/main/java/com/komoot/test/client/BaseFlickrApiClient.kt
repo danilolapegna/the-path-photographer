@@ -22,9 +22,8 @@ open class BaseFlickrApiClient {
             .scheme(SECURE_PROTOCOL)
             .authority(FLICKR_AUTHORITY)
             .appendPath(SERVICES_PATH)
-            .appendPath(REST_PATH)
             .build()
-            .toString()
+            .toString() + "/"
     }
 
     fun getFlickrService() = apiAdapter.create(BaseFlickrApi::class.java)
@@ -53,9 +52,8 @@ open class BaseFlickrApiClient {
     companion object {
 
         private const val SECURE_PROTOCOL = "https"
-        private const val FLICKR_AUTHORITY = "www.flickr.co"
+        private const val FLICKR_AUTHORITY = "www.flickr.com"
         private const val SERVICES_PATH = "services"
-        private const val REST_PATH = "rest"
 
     }
 }

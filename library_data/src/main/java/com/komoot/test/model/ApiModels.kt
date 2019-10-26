@@ -8,30 +8,42 @@ import java.io.Serializable
 @Root(name = "photos", strict = false)
 class FlickrPhotoResponse {
 
-    @ElementList
+    @set:ElementList(name = "photos")
+    @get:ElementList(name = "photos")
     var photos: ArrayList<FlickrPhoto>? = null
 }
 
 class FlickrPhoto : Serializable {
 
-    @Attribute(name = "id", required = true)
+    @set:Attribute(name = "id", required = true)
+    @get:Attribute(name = "id", required = true)
     var id: String? = null
 
-    @Attribute(name = "owner", required = true)
+    @set:Attribute(name = "owner", required = true)
+    @get:Attribute(name = "owner", required = true)
     var owner: String? = null
 
-    @Attribute(name = "secret", required = true)
+    @set:Attribute(name = "secret", required = true)
+    @get:Attribute(name = "secret", required = true)
     var secret: String? = null
 
-    @Attribute(name = "server", required = true)
+    @set:Attribute(name = "server", required = true)
+    @get:Attribute(name = "server", required = true)
     var server: String? = null
 
-    @Attribute(name = "title", required = true)
+    @set:Attribute(name = "farm", required = true)
+    @get:Attribute(name = "farm", required = true)
+    var farm: String? = null
+
+    @set:Attribute(name = "title", required = true)
+    @get:Attribute(name = "title", required = true)
     var title: String? = null
 
-    @Attribute(name = "ispublic", required = false)
+    @set:Attribute(name = "ispublic", required = false)
+    @get:Attribute(name = "ispublic", required = false)
     var ispublic: String? = null
 
-    @Attribute(name = "isfriend", required = false)
+    @set:Attribute(name = "isfriend", required = false)
+    @get:Attribute(name = "isfriend", required = false)
     var isfriend: String? = null
 }

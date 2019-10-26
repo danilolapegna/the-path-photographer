@@ -8,11 +8,20 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.*
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.*
+import com.komoot.test.model.FlickrPhotoResponse
 import com.komoot.test.ui.activity.MainActivity
+import com.komoot.test.util.DistanceUtils.atLeastAHundredMetersBetweenLocations
+import com.komoot.test.util.LocationTrackerUtil.getLastMilestone
+import com.komoot.test.util.LocationTrackerUtil.hasMilestone
+import com.komoot.test.util.LocationTrackerUtil.setNewMilestone
+import com.komoot.test.util.ReactiveNetworkUtils
+import com.komoot.test.util.RequestListener
+import com.komoot.test.viewmodel.FlickrPhotoRepository
 import java.util.concurrent.TimeUnit
 
 class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
@@ -46,6 +55,13 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
 
         val powerManager = (getSystemService(Context.POWER_SERVICE) as? PowerManager)
         wakeLock = powerManager?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG)
+    }
+
+    /*
+     * Phase 1: Connect Client, start notification and getting the updates
+     */
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        createNotificationChannel()
 
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingNotificationIntent = PendingIntent.getActivity(
@@ -57,13 +73,6 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
             .setContentText(NOTIFICATION_TEXT)
             .setOngoing(true)
             .setContentIntent(pendingNotificationIntent)
-    }
-
-    /*
-     * Phase 1: Connect Client, start notification and getting the updates
-     */
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        createNotificationChannel()
 
         val notification = builder.build()
         startForeground(NOTIFICATION_ID, notification)
@@ -115,6 +124,42 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
     }
 
     private fun handleLastLocation(location: Location) {
+        if (!hasMilestone(this)) {
+            setNewMilestone(
+                this,
+                Pair(location.latitude.toFloat(), location.longitude.toFloat())
+            )
+        } else {
+            val lastMilestone = getLastMilestone(this)
+            if (atLeastAHundredMetersBetweenLocations(lastMilestone, location)) {
+                val newMilestoneLatitude = location.latitude.toFloat()
+                val newMilestoneLongitude = location.longitude.toFloat()
+                executeFetchPhotoRequest(newMilestoneLatitude, newMilestoneLongitude)
+                setNewMilestone(
+                    this,
+                    Pair(newMilestoneLatitude, newMilestoneLongitude)
+                )
+            }
+        }
+    }
+
+    private fun executeFetchPhotoRequest(
+        newMilestoneLatitude: Float,
+        newMilestoneLongitude: Float
+    ) {
+        val request =
+            FlickrPhotoRepository.getPhotoByCoordinates(newMilestoneLatitude, newMilestoneLongitude)
+        ReactiveNetworkUtils.executeRequest(request, getRequestListener())
+    }
+
+    private fun getRequestListener() = object : RequestListener<FlickrPhotoResponse> {
+        override fun onSuccess(response: FlickrPhotoResponse) {
+            Log.d("Wow!", "It worked")
+        }
+
+        override fun onFailure(exception: Throwable) {
+            Log.d("Nay!", "It didn't work")
+        }
 
     }
 
