@@ -26,7 +26,7 @@ open class BaseFlickrApiClient {
             .toString() + "/"
     }
 
-    fun getFlickrService() = apiAdapter.create(BaseFlickrApi::class.java)
+    fun getFlickrService(): BaseFlickrApi = apiAdapter.create(BaseFlickrApi::class.java)
 
     private fun buildApiAdapter(): Retrofit {
         return Retrofit.Builder()

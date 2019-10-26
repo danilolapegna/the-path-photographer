@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--  PADDING/MARGIN -->
     <dimen name="padding_default">10dp</dimen>
+    <dimen name="padding_small">5dp</dimen>
+
+    <!--    TEXT-->
+    <dimen name="text_size_big">24sp</dimen>
+
+    <!--    OTHER-->
     <dimen name="photo_height_default">240dp</dimen>
+    <dimen name="fab_default_margin">16dp</dimen>
+
 </resources>

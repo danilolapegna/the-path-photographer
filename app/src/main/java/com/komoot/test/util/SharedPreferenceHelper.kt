@@ -9,32 +9,60 @@ object SharedPreferenceHelper {
 
     const val TAG = "PreferenceUtils"
 
-    private const val MILESTONE_LAST_LAT_KEY = "last_milestone_lat"
-    private const val MILESTONE_LAST_LON_KEY = "last_mileston_lon"
+    private const val FLOAT_MILESTONE_LAST_LAT_KEY = "last_milestone_lat"
+    private const val FLOAT_MILESTONE_LAST_LON_KEY = "last_milestone_lon"
+
+    private const val BOOL_USER_HAS_STARTED_TRACKING = "user_has_started_tracking"
 
     private fun getSharedPreferences(context: Context?) =
         PreferenceManager.getDefaultSharedPreferences(context)
+
+    fun setUserHasStartedTracking(context: Context?, started: Boolean) {
+        putBoolean(context, BOOL_USER_HAS_STARTED_TRACKING, started)
+    }
+
+    fun userHasStartedTracking(context: Context?): Boolean =
+        getBoolean(context, BOOL_USER_HAS_STARTED_TRACKING)
 
     fun storeLocationMilestone(
         context: Context?,
         latitude: Float,
         longitude: Float
     ) {
-        putFloat(context, MILESTONE_LAST_LAT_KEY, latitude)
-        putFloat(context, MILESTONE_LAST_LON_KEY, longitude)
+        putFloat(context, FLOAT_MILESTONE_LAST_LAT_KEY, latitude)
+        putFloat(context, FLOAT_MILESTONE_LAST_LON_KEY, longitude)
     }
 
     fun getLastLocationMilestone(context: Context?): Pair<Float, Float> {
-        val latitude = getFloat(context, MILESTONE_LAST_LAT_KEY, -1f)
-        val longitude = getFloat(context, MILESTONE_LAST_LON_KEY, -1f)
+        val latitude = getFloat(context, FLOAT_MILESTONE_LAST_LAT_KEY, -1f)
+        val longitude = getFloat(context, FLOAT_MILESTONE_LAST_LON_KEY, -1f)
         return Pair(latitude, longitude)
     }
 
     fun hasLastLocationMilestone(context: Context?): Boolean =
-        hasAllKeys(context, MILESTONE_LAST_LAT_KEY, MILESTONE_LAST_LON_KEY)
+        hasAllKeys(context, FLOAT_MILESTONE_LAST_LAT_KEY, FLOAT_MILESTONE_LAST_LON_KEY)
 
     fun clearLastLocationMilestone(context: Context?) {
-        removeKeys(context, MILESTONE_LAST_LAT_KEY, MILESTONE_LAST_LON_KEY)
+        removeKeys(context, FLOAT_MILESTONE_LAST_LAT_KEY, FLOAT_MILESTONE_LAST_LON_KEY)
+    }
+
+    private fun getBoolean(
+        context: Context?,
+        key: String,
+        defaultValue: Boolean = false
+    ): Boolean {
+        return getValue(
+            context,
+            { (getSharedPreferences(context)).getBoolean(key, defaultValue) }, defaultValue
+        ) ?: defaultValue
+    }
+
+    private fun putBoolean(
+        context: Context? = null,
+        key: String,
+        value: Boolean
+    ) {
+        store(context) { it.putBoolean(key, value) }
     }
 
     private fun getFloat(
@@ -53,7 +81,7 @@ object SharedPreferenceHelper {
         key: String,
         value: Float
     ) {
-        store(context, { it.putFloat(key, value) })
+        store(context) { it.putFloat(key, value) }
     }
 
     private fun removeKeys(context: Context?, vararg keys: String?) {

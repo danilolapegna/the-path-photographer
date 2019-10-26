@@ -1,2 +1,2 @@
 include ':app', ':library_data', ':data'
-rootProject.name='Komoot test'
+rootProject.name = 'PathPhotographer'

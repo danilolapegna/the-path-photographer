@@ -1,6 +1,11 @@
 <resources>
-    <string name="app_name">Komoot test</string>
+    <string name="app_name">PathPhotographer</string>
     <string name="ask_location_permission">Location permissions needed</string>
     <string name="go_to_settings">Settings</string>
     <string name="permission_denied">You denied location permissions. Go to settings to change.</string>
+
+    <string name="flickr_url_base">https://farm%s.staticflickr.com/%s/%s_%s.jpg</string>
+
+    <string name="empty_view_not_tracking">Want to start fetching amazing pictures alongside your path? Click on the \"Play\" button to start the fun!</string>
+    <string name="empty_view_tracking">OK, now just start walking …</string>
 </resources>

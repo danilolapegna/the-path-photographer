@@ -26,11 +26,14 @@ object PermissionsUtils {
         return permissions.filter { !isPermissionGranted(activity, it) }.isEmpty()
     }
 
-   private fun isPermissionGranted(activity: Activity?, permission: String): Boolean {
+    private fun isPermissionGranted(activity: Activity?, permission: String): Boolean {
         if (activity == null) {
             return false
         }
-        return ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED
+        return ContextCompat.checkSelfPermission(
+            activity,
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     fun shouldRequestPermissions(activity: FragmentActivity, vararg permissions: String): Boolean {

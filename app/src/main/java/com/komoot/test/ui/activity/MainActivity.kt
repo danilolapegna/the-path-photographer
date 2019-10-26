@@ -12,6 +12,8 @@ import com.komoot.test.util.LocationTrackerUtil.getLocationPermissions
 import com.komoot.test.util.PermissionsUtils
 import com.komoot.test.util.PermissionsUtils.allPermissionsGranted
 import com.komoot.test.util.PermissionsUtils.getGoToSettingsIntent
+import com.komoot.test.util.SharedPreferenceHelper
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,8 +26,30 @@ class MainActivity : AppCompatActivity() {
                 R.id.fragment_container,
                 false
             )
-        requestPermissions()
+        setupFloatingActionButton()
     }
+
+    private fun setupFloatingActionButton() {
+        setupFloatingActionButtonClick()
+        setupFloatingActionButtonDrawable()
+    }
+
+    private fun setupFloatingActionButtonClick() {
+        playStopFab?.setOnClickListener {
+            if (userHasStartedTracking()) stopTracking() else requestLocationPermissions()
+        }
+    }
+
+    private fun setupFloatingActionButtonDrawable() {
+        if (userHasStartedTracking()) {
+            playStopFab?.setImageResource(R.drawable.ic_stop)
+        } else {
+            playStopFab?.setImageResource(R.drawable.ic_play)
+        }
+    }
+
+    private fun userHasStartedTracking(): Boolean =
+        SharedPreferenceHelper.userHasStartedTracking(this)
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>,
@@ -35,13 +59,13 @@ class MainActivity : AppCompatActivity() {
 
             /* User interaction cancelled */
             if (grantResults.isEmpty()) {
-                requestPermissions()
+                requestLocationPermissions()
 
                 /* Granted */
             } else if (allPermissionsGranted(this, *getLocationPermissions())) {
                 startTracking()
 
-                /* Denied, go to settings */
+                /* Denied, propose to go to settings */
             } else {
                 showSnackbar(
                     getString(R.string.permission_denied),
@@ -54,22 +78,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun startTracking() {
         LocationTrackerUtil.startTracking(this)
+        setupFloatingActionButtonDrawable()
     }
 
-    private fun requestPermissions() {
-        if (PermissionsUtils.shouldRequestPermissions(
-                this, *getLocationPermissions()
-            )
-        ) {
-            showSnackbar(
-                getString(R.string.ask_location_permission),
-                R.color.colorPrimary,
-                getString(android.R.string.ok),
-                View.OnClickListener { requestLocationPermissions() })
-
-        } else {
-            requestLocationPermissions()
-        }
+    private fun stopTracking() {
+        LocationTrackerUtil.stopTracking(this)
+        setupFloatingActionButtonDrawable()
     }
 
     private fun requestLocationPermissions() {
