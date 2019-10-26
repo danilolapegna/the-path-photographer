@@ -29,7 +29,7 @@ import com.komoot.test.util.LocationTrackerUtil.setNewMilestone
 import com.komoot.test.util.NotificationUtils.updateNotificationText
 import com.komoot.test.util.ReactiveNetworkUtils
 import com.komoot.test.util.RequestListener
-import com.komoot.test.util.SharedPreferenceHelper.setUserHasStartedTracking
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
@@ -81,26 +81,24 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
      * Phase 2: Connect Client, start notification and getting the updates
      */
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        isStartedOrStarting = true
         createNotificationChannel()
         val notification = builder.build()
         startForeground(NOTIFICATION_ID, notification)
         googleApiClient?.connect()
-        LocationTrackerUtil.trackingSubject.onNext(true)
-        setUserHasStartedTracking(this, true)
+        LocationTrackerUtil.startTracking(this, false)
         return START_STICKY
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        isStartedOrStarting = false
         stopForeground(true)
         googleApiClient?.disconnect()
         if (wakeLock?.isHeld == true) {
             wakeLock?.release();
         }
         fusedLocationApiClient.removeLocationUpdates(locationCallback)
-        setUserHasStartedTracking(this, false)
-        LocationTrackerUtil.trackingSubject.onNext(false)
-        LocationTrackerUtil.clearMilestone(this)
+        LocationTrackerUtil.stopTracking(this, false)
         super.onDestroy()
     }
 
@@ -164,19 +162,23 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
     ) {
         val request =
             FlickrPhotoRepository.getPhotoByCoordinates(newMilestoneLatitude, newMilestoneLongitude)
-        ReactiveNetworkUtils.executeRequest(request, getRequestListener())
+
+        val requestDate = Calendar.getInstance().time
+        ReactiveNetworkUtils.executeRequest(request, getRequestListener(requestDate))
     }
 
-    private fun getRequestListener() = object : RequestListener<FlickrPhotoResponse> {
-        override fun onSuccess(response: FlickrPhotoResponse) {
-            response.photos?.firstOrNull()?.let { photo -> RealmHelper.persistPhoto(photo) }
-        }
+    private fun getRequestListener(requestDate: Date) =
+        object : RequestListener<FlickrPhotoResponse> {
+            override fun onSuccess(response: FlickrPhotoResponse) {
+                response.photos?.shuffled()?.firstOrNull()
+                    ?.let { photo -> RealmHelper.persistPhoto(requestDate, photo) }
+            }
 
-        override fun onFailure(exception: Throwable) {
-            Log.e(TAG, "Unable to fetch photo for location")
-        }
+            override fun onFailure(exception: Throwable) {
+                Log.e(TAG, "Unable to fetch photo for location")
+            }
 
-    }
+        }
 
     override fun onConnectionSuspended(p0: Int) {
     }
@@ -194,6 +196,9 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
     }
 
     companion object {
+
+        var isStartedOrStarting = false
+
         private const val CHANNEL_ID = "location_Tracker_Id"
         private const val CHANNEL_NAME = "Foreground Service Channel"
 

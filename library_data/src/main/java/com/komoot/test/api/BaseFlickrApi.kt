@@ -13,11 +13,14 @@ interface BaseFlickrApi {
         @Query("method") method: String = PHOTO_SEARCH_METHOD,
         @Query("api_key") apiKey: String = FLICKR_API_KEY,
         @Query("api_secret") apiSecret: String = FLICKR_API_SECRET,
+        @Query("radius") radius: Float = DEFAULT_RADIUS_KM,
         @Query("lat") lat: Float,
         @Query("lon") lon: Float
     ): Single<FlickrPhotoResponse>
 
     companion object {
+        private const val DEFAULT_RADIUS_KM = 0.05f
+
         private const val PHOTO_SEARCH_METHOD = "flickr.photos.search"
 
         private const val FLICKR_API_KEY = "ef1c4bbba3ff4eae1bbf916459ffddb1"

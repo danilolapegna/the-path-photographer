@@ -1,9 +1,14 @@
 package com.komoot.test.ui.activity
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.komoot.test.R
+import com.komoot.test.realm.RealmHelper
+import com.komoot.test.service.FlickrPhotoService
 import com.komoot.test.ui.fragment.MainFragment
 import com.komoot.test.ui.showSnackbar
 import com.komoot.test.ui.switchFragment
@@ -12,7 +17,6 @@ import com.komoot.test.util.LocationTrackerUtil.getLocationPermissions
 import com.komoot.test.util.PermissionsUtils
 import com.komoot.test.util.PermissionsUtils.allPermissionsGranted
 import com.komoot.test.util.PermissionsUtils.getGoToSettingsIntent
-import com.komoot.test.util.SharedPreferenceHelper
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -40,6 +44,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_reset -> {
+                RealmHelper.clearAllPhotos()
+                return true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
     private fun setupFloatingActionButtonDrawable() {
         if (userHasStartedTracking()) {
             playStopFab?.setImageResource(R.drawable.ic_stop)
@@ -48,8 +67,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun userHasStartedTracking(): Boolean =
-        SharedPreferenceHelper.userHasStartedTracking(this)
+    private fun userHasStartedTracking(): Boolean = FlickrPhotoService.isStartedOrStarting
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>,
@@ -78,11 +96,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun startTracking() {
         LocationTrackerUtil.startTracking(this)
+        Toast.makeText(this, R.string.started_tracking, Toast.LENGTH_SHORT).show()
         setupFloatingActionButtonDrawable()
     }
 
     private fun stopTracking() {
         LocationTrackerUtil.stopTracking(this)
+        Toast.makeText(this, R.string.stopped_tracking, Toast.LENGTH_SHORT).show()
         setupFloatingActionButtonDrawable()
     }
 

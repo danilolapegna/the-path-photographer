@@ -12,17 +12,8 @@ object SharedPreferenceHelper {
     private const val FLOAT_MILESTONE_LAST_LAT_KEY = "last_milestone_lat"
     private const val FLOAT_MILESTONE_LAST_LON_KEY = "last_milestone_lon"
 
-    private const val BOOL_USER_HAS_STARTED_TRACKING = "user_has_started_tracking"
-
     private fun getSharedPreferences(context: Context?) =
         PreferenceManager.getDefaultSharedPreferences(context)
-
-    fun setUserHasStartedTracking(context: Context?, started: Boolean) {
-        putBoolean(context, BOOL_USER_HAS_STARTED_TRACKING, started)
-    }
-
-    fun userHasStartedTracking(context: Context?): Boolean =
-        getBoolean(context, BOOL_USER_HAS_STARTED_TRACKING)
 
     fun storeLocationMilestone(
         context: Context?,

@@ -8,4 +8,7 @@
 
     <string name="empty_view_not_tracking">Want to start fetching amazing pictures alongside your path? Click on the \"Play\" button to start the fun!</string>
     <string name="empty_view_tracking">OK, now just start walking …</string>
+    <string name="action_reset">Reset</string>
+    <string name="started_tracking">Started tracking</string>
+    <string name="stopped_tracking">Stopped tracking</string>
 </resources>

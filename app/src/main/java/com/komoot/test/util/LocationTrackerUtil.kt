@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.content.ContextCompat
-import com.komoot.test.realm.RealmHelper
 import com.komoot.test.service.FlickrPhotoService
 import com.komoot.test.util.SharedPreferenceHelper.clearLastLocationMilestone
 import com.komoot.test.util.SharedPreferenceHelper.getLastLocationMilestone
 import com.komoot.test.util.SharedPreferenceHelper.hasLastLocationMilestone
-import com.komoot.test.util.SharedPreferenceHelper.setUserHasStartedTracking
 import com.komoot.test.util.SharedPreferenceHelper.storeLocationMilestone
 import io.reactivex.subjects.PublishSubject
 
@@ -53,20 +51,23 @@ object LocationTrackerUtil {
             )
         }
 
-    fun startTracking(context: Context) {
-        val serviceIntent = getLocationTrackerServiceIntent(context)
+    fun startTracking(context: Context, startService: Boolean = true) {
         trackingSubject.onNext(true)
-        setUserHasStartedTracking(context, true)
-        ContextCompat.startForegroundService(context, serviceIntent)
+        FlickrPhotoService.isStartedOrStarting = true
+        if (startService) {
+            val serviceIntent = getLocationTrackerServiceIntent(context)
+            ContextCompat.startForegroundService(context, serviceIntent)
+        }
     }
 
-    fun stopTracking(context: Context) {
-        val serviceIntent = getLocationTrackerServiceIntent(context)
-        setUserHasStartedTracking(context, false)
+    fun stopTracking(context: Context, stopService: Boolean = true) {
+        FlickrPhotoService.isStartedOrStarting = false
         trackingSubject.onNext(false)
-        RealmHelper.clearAllPhotos()
         clearMilestone(context)
-        context.stopService(serviceIntent)
+        if (stopService) {
+            val serviceIntent = getLocationTrackerServiceIntent(context)
+            context.stopService(serviceIntent)
+        }
     }
 
     private fun getLocationTrackerServiceIntent(context: Context) =

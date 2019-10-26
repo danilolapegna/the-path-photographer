@@ -8,6 +8,7 @@ import java.util.*
 object FlickrPhotoTransformer {
 
     fun transformApiItem(
+        requestTime: Date,
         flickrPhoto: FlickrPhoto,
         context: Context?
     ): RealmFlickrPhoto {
@@ -17,7 +18,7 @@ object FlickrPhotoTransformer {
                 flickrPhoto,
                 context
             )
-            fetchedAt = Calendar.getInstance().time
+            fetchedAt = requestTime
         }
     }
 

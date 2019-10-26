@@ -6,6 +6,7 @@ import com.komoot.test.realm.FlickrPhotoTransformer.transformApiItem
 import io.realm.Realm
 import io.realm.RealmResults
 import io.realm.Sort
+import java.util.*
 
 object RealmHelper {
 
@@ -14,8 +15,8 @@ object RealmHelper {
     private val applicationContext
         get() = PathTrackerApplication.instance
 
-    fun persistPhoto(photo: FlickrPhoto) {
-        val realmObject = transformApiItem(photo, applicationContext)
+    fun persistPhoto(requestDate: Date, photo: FlickrPhoto) {
+        val realmObject = transformApiItem(requestDate, photo, applicationContext)
         getRealm().executeTransaction {
             it.insertOrUpdate(realmObject)
         }
