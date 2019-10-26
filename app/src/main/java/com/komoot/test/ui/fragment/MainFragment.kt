@@ -1,11 +1,9 @@
 package com.komoot.test.ui.fragment
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.komoot.test.R
@@ -16,12 +14,14 @@ import com.komoot.test.ui.adapter.FlickrPhotosRealmAdapter
 import com.komoot.test.ui.adapter.RealmAdapterListener
 import com.komoot.test.util.LocationTrackerUtil
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.fragment_main.*
 
 class MainFragment : Fragment(), RealmAdapterListener {
 
     private var photos: RealmResults<RealmFlickrPhoto>? = null
+    private var trackingEventSubscription: Disposable? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,11 +41,17 @@ class MainFragment : Fragment(), RealmAdapterListener {
         setupEmptyView()
     }
 
-    @SuppressLint("CheckResult")
     private fun initTrackingSubjectForEmptyView() {
-        LocationTrackerUtil.trackingSubject
+        trackingEventSubscription = LocationTrackerUtil.trackingSubject
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { setupEmptyView() }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        /* Don't keep the subscription alive over the lifecycle */
+        trackingEventSubscription?.dispose()
     }
 
     override fun onDataInAdapterChanged() {

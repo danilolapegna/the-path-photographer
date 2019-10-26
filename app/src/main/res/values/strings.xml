@@ -11,4 +11,10 @@
     <string name="action_reset">Reset</string>
     <string name="started_tracking">Started tracking</string>
     <string name="stopped_tracking">Stopped tracking</string>
+
+    <string name="notification_title">PathPhotographer is active</string>
+    <string name="notification_text">Hold on while we grab your location</string>
+    <string name="notification_text_location">You are at %s %s</string>
+    <string name="no_network">No network connection. We\'ll fetch a photo again once your connection is back</string>
+
 </resources>

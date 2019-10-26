@@ -9,6 +9,7 @@ import android.content.Intent
 import android.location.Location
 import android.os.*
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
@@ -26,6 +27,7 @@ import com.komoot.test.util.LocationTrackerUtil
 import com.komoot.test.util.LocationTrackerUtil.getLastMilestone
 import com.komoot.test.util.LocationTrackerUtil.hasMilestone
 import com.komoot.test.util.LocationTrackerUtil.setNewMilestone
+import com.komoot.test.util.NetworkConnectionUtils
 import com.komoot.test.util.NotificationUtils.updateNotificationText
 import com.komoot.test.util.ReactiveNetworkUtils
 import com.komoot.test.util.RequestListener
@@ -70,8 +72,8 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
         )
 
         builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(NOTIFICATION_TITLE)
-            .setContentText(NOTIFICATION_TEXT)
+            .setContentTitle(getString(R.string.notification_title))
+            .setContentText(getString(R.string.notification_text))
             .setSmallIcon(R.drawable.ic_camera_white)
             .setOngoing(true)
             .setContentIntent(pendingNotificationIntent)
@@ -131,8 +133,9 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
     }
 
     private fun handleLastLocation(location: Location) {
+        val baseText = getString(R.string.notification_text_location)
         updateNotificationText(
-            "You are at ${location.latitude}  ${location.longitude}",
+            String.format(baseText, location.latitude, location.longitude),
             NOTIFICATION_ID,
             builder,
             this
@@ -145,13 +148,17 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
         } else {
             val lastMilestone = getLastMilestone(this)
             if (atLeastAHundredMetersBetweenLocations(lastMilestone, location)) {
-                val newMilestoneLatitude = location.latitude.toFloat()
-                val newMilestoneLongitude = location.longitude.toFloat()
-                executeFetchPhotoRequest(newMilestoneLatitude, newMilestoneLongitude)
-                setNewMilestone(
-                    this,
-                    Pair(newMilestoneLatitude, newMilestoneLongitude)
-                )
+                if (NetworkConnectionUtils.isNetworkConnected(this)) {
+                    val newMilestoneLatitude = location.latitude.toFloat()
+                    val newMilestoneLongitude = location.longitude.toFloat()
+                    executeFetchPhotoRequest(newMilestoneLatitude, newMilestoneLongitude)
+                    setNewMilestone(
+                        this,
+                        Pair(newMilestoneLatitude, newMilestoneLongitude)
+                    )
+                } else {
+                    Toast.makeText(this, R.string.no_network, Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -201,9 +208,6 @@ class FlickrPhotoService : Service(), GoogleApiClient.ConnectionCallbacks,
 
         private const val CHANNEL_ID = "location_Tracker_Id"
         private const val CHANNEL_NAME = "Foreground Service Channel"
-
-        private const val NOTIFICATION_TITLE = "PathPhotographer is active"
-        private const val NOTIFICATION_TEXT = "Hold on while we grab your location"
 
         private const val UPDATE_INTERVAL_IN_MS = 2000L
 

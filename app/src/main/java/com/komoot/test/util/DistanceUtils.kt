@@ -24,7 +24,7 @@ object DistanceUtils {
         endLatitude: Double,
         endLongitude: Double
     ): Float {
-        val results = floatArrayOf(1F)
+        val results = floatArrayOf(0F)
         Location.distanceBetween(
             startLatitude,
             startLongitude,

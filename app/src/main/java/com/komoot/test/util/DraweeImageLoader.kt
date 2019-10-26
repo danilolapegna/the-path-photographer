@@ -2,10 +2,12 @@ package com.komoot.test.util
 
 import android.net.Uri
 import com.facebook.drawee.backends.pipeline.Fresco
+import com.facebook.drawee.drawable.ScalingUtils
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder
 import com.facebook.drawee.view.SimpleDraweeView
 import com.facebook.imagepipeline.request.ImageRequest
 import com.facebook.imagepipeline.request.ImageRequestBuilder
+import com.komoot.test.R
 
 object DraweeImageLoader {
 
@@ -22,7 +24,12 @@ object DraweeImageLoader {
             .newDraweeControllerBuilder()
             .setOldController(draweeView.controller)
             .setImageRequest(requestBuilder?.build())
-        draweeView.hierarchy = draweeBuilder.build()
+
+        draweeView.hierarchy =
+            draweeBuilder.build().also {
+                it.setPlaceholderImage(R.drawable.ic_camera_placeholder, ScalingUtils.ScaleType.CENTER_INSIDE)
+            }
+
         draweeView.controller = controller.build()
     }
 }

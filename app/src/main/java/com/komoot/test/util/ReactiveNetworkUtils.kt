@@ -8,9 +8,12 @@ import io.reactivex.schedulers.Schedulers
 
 object ReactiveNetworkUtils {
 
+    private const val TIMES_RETRY = 3L
+
     fun <T> executeRequest(request: Single<T>, listener: RequestListener<T>) {
         request.subscribeOn(Schedulers.newThread())
             .cache()
+            .retry(TIMES_RETRY)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(wrapObserver(listener))
     }
