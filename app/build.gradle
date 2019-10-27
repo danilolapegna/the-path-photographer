@@ -9,7 +9,7 @@ android {
     compileSdkVersion Integer.valueOf(project.ANDROID_BUILD_SDK_VERSION)
     buildToolsVersion project.ANDROID_BUILD_TOOLS_VERSION
     defaultConfig {
-        applicationId "com.komoot.test"
+        applicationId "com.komoot.app"
         minSdkVersion Integer.valueOf(project.ANDROID_BUILD_MIN_SDK_VERSION)
         targetSdkVersion Integer.valueOf(project.ANDROID_BUILD_TARGET_SDK_VERSION)
         versionCode Integer.valueOf(project.VERSION_CODE)
@@ -43,4 +43,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    testImplementation 'androidx.test:rules:1.2.0'
 }
