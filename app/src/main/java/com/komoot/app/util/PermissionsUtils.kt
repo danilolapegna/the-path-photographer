@@ -36,17 +36,6 @@ object PermissionsUtils {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun shouldRequestPermissions(activity: FragmentActivity, vararg permissions: String): Boolean {
-        permissions.forEach {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    activity,
-                    it
-                )
-            ) return true
-        }
-        return false
-    }
-
     fun requestPermissions(
         activity: FragmentActivity,
         requestCode: Int,

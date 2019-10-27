@@ -31,9 +31,7 @@ class LocationService : Service(),
     private val locationCallback: LocationCallback by lazy { buildLocationCallback() }
 
     private val fusedLocationApiClient by lazy {
-        LocationServices.getFusedLocationProviderClient(
-            this
-        )
+        LocationServices.getFusedLocationProviderClient(this)
     }
 
     private lateinit var builder: NotificationCompat.Builder
@@ -138,42 +136,44 @@ class LocationService : Service(),
     private fun getLocationRequest(): LocationRequest {
         return LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = TimeUnit.SECONDS.toMillis(0)
-            fastestInterval = TimeUnit.SECONDS.toMillis(0)
-            maxWaitTime = UPDATE_INTERVAL_IN_MS
+            interval = TimeUnit.SECONDS.toMillis(INTERVAL_MIN)
+            fastestInterval = TimeUnit.SECONDS.toMillis(INTERVAL_MIN)
+            maxWaitTime = MAX_WAIT_TIME_IN_MS
         }
     }
 
     companion object {
 
         var isStartedOrStarting = false
-        val locationHandlers: ArrayList<LocationServiceHander> = ArrayList()
+
+        private val locationHandlers: ArrayList<LocationServiceHandler> = ArrayList()
 
         private const val CHANNEL_ID = "location_Tracker_Id"
         private const val CHANNEL_NAME = "Foreground Service Channel"
 
-        private const val UPDATE_INTERVAL_IN_MS = 2000L
+        private const val INTERVAL_MIN = 0L
+
+        private const val MAX_WAIT_TIME_IN_MS = 2000L
 
         private const val NOTIFICATION_ID = 1
 
         private const val TAG = "myapp:flickrPhotoTag"
 
-        fun addHandler(locationServiceHander: LocationServiceHander) {
-            locationHandlers.add(locationServiceHander)
+        fun addHandler(locationServiceHandler: LocationServiceHandler) {
+            locationHandlers.add(locationServiceHandler)
         }
 
-        fun removeHandler(locationServiceHander: LocationServiceHander) {
-            locationHandlers.remove(locationServiceHander)
+        fun removeHandler(locationServiceHandler: LocationServiceHandler) {
+            locationHandlers.remove(locationServiceHandler)
         }
 
-        fun clearAllHanders() {
+        fun clearAllHandlers() {
             locationHandlers.clear()
         }
     }
-
 }
 
-interface LocationServiceHander {
+interface LocationServiceHandler {
 
     fun handleLocation(location: Location, context: Context)
 }

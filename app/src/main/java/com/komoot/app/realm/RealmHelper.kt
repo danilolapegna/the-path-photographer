@@ -22,11 +22,10 @@ object RealmHelper {
         }
     }
 
-    fun queryMyPathPhotos(): RealmResults<RealmFlickrPhoto>? {
-        return getRealm().where(RealmFlickrPhoto::class.java)
+    fun queryMyPathPhotos(): RealmResults<RealmFlickrPhoto>? =
+        getRealm().where(RealmFlickrPhoto::class.java)
             .sort(FETCHED_AT_FIELD, Sort.DESCENDING)
             .findAllAsync()
-    }
 
     fun clearAllPhotos() {
         getRealm().executeTransaction { realm -> realm.deleteAll() }

@@ -37,25 +37,6 @@ object SharedPreferenceHelper {
         removeKeys(context, FLOAT_MILESTONE_LAST_LAT_KEY, FLOAT_MILESTONE_LAST_LON_KEY)
     }
 
-    private fun getBoolean(
-        context: Context?,
-        key: String,
-        defaultValue: Boolean = false
-    ): Boolean {
-        return getValue(
-            context,
-            { (getSharedPreferences(context)).getBoolean(key, defaultValue) }, defaultValue
-        ) ?: defaultValue
-    }
-
-    private fun putBoolean(
-        context: Context? = null,
-        key: String,
-        value: Boolean
-    ) {
-        store(context) { it.putBoolean(key, value) }
-    }
-
     private fun getFloat(
         context: Context?,
         key: String,

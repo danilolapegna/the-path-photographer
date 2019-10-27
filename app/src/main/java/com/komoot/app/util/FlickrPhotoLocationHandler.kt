@@ -8,10 +8,10 @@ import com.komoot.app.FlickrPhotoRepository
 import com.komoot.app.R
 import com.komoot.app.model.FlickrPhotoResponse
 import com.komoot.app.realm.RealmHelper
-import com.komoot.app.service.LocationServiceHander
+import com.komoot.app.service.LocationServiceHandler
 import java.util.*
 
-class FlickrPhotoLocationHandler : LocationServiceHander {
+class FlickrPhotoLocationHandler : LocationServiceHandler {
 
     override fun handleLocation(
         location: Location,

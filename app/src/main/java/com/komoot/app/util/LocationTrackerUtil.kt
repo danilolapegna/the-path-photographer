@@ -50,21 +50,21 @@ object LocationTrackerUtil {
         }
 
     fun startTracking(context: Context, startService: Boolean = true) {
-        LocationService.isStartedOrStarting = true
-        LocationService.addHandler(flickrLocationServiceHandler)
         trackingSubject.onNext(true)
         if (startService) {
+            LocationService.isStartedOrStarting = true
+            LocationService.addHandler(flickrLocationServiceHandler)
             val serviceIntent = getLocationTrackerServiceIntent(context)
             ContextCompat.startForegroundService(context, serviceIntent)
         }
     }
 
     fun stopTracking(context: Context, stopService: Boolean = true) {
-        LocationService.isStartedOrStarting = false
-        LocationService.clearAllHanders()
         trackingSubject.onNext(false)
         clearLastLocationMilestone(context)
         if (stopService) {
+            LocationService.isStartedOrStarting = false
+            LocationService.clearAllHandlers()
             val serviceIntent = getLocationTrackerServiceIntent(context)
             context.stopService(serviceIntent)
         }

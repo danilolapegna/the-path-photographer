@@ -18,13 +18,13 @@ abstract class RealmAdapter<T : RecyclerView.ViewHolder, V : RealmModel>(
 ) :
     RecyclerView.Adapter<T>() {
 
-    private var listener: OrderedRealmCollectionChangeListener<RealmResults<V>>
+    private var dataChangeListener: OrderedRealmCollectionChangeListener<RealmResults<V>>
 
     init {
-        listener = createListener()
+        dataChangeListener = createDataChangeListener()
     }
 
-    private fun createListener(): OrderedRealmCollectionChangeListener<RealmResults<V>> {
+    private fun createDataChangeListener(): OrderedRealmCollectionChangeListener<RealmResults<V>> {
         return object : OrderedRealmCollectionChangeListener<RealmResults<V>> {
             override fun onChange(t: RealmResults<V>, changeSet: OrderedCollectionChangeSet) {
                 if (changeSet.state == OrderedCollectionChangeSet.State.INITIAL) {
@@ -83,11 +83,11 @@ abstract class RealmAdapter<T : RecyclerView.ViewHolder, V : RealmModel>(
     }
 
     private fun addListener(data: RealmResults<V>?) {
-        data?.addChangeListener(listener)
+        data?.addChangeListener(dataChangeListener)
     }
 
     private fun removeListener(data: RealmResults<V>?) {
-        data?.removeChangeListener(listener)
+        data?.removeChangeListener(dataChangeListener)
     }
 
     override fun getItemCount(): Int = data?.size ?: 0
