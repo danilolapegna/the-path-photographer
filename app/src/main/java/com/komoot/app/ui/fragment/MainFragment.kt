@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.komoot.app.R
+import com.komoot.app.lifecycle.RxLifecycleObserver
+import com.komoot.app.lifecycle.RxUI
 import com.komoot.app.realm.RealmFlickrPhoto
 import com.komoot.app.realm.RealmHelper
 import com.komoot.app.service.LocationService
@@ -18,10 +20,17 @@ import io.reactivex.disposables.Disposable
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.fragment_main.*
 
-class MainFragment : Fragment(), RealmAdapterListener {
+class MainFragment : Fragment(),
+    RealmAdapterListener,
+    RxUI {
 
     private var photos: RealmResults<RealmFlickrPhoto>? = null
     private var trackingEventSubscription: Disposable? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        lifecycle.addObserver(RxLifecycleObserver(this))
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,10 +56,7 @@ class MainFragment : Fragment(), RealmAdapterListener {
             .subscribe { setupEmptyView() }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-        /* Don't keep the subscription alive over the lifecycle */
+    override fun disposeSubscriptions() {
         trackingEventSubscription?.dispose()
     }
 

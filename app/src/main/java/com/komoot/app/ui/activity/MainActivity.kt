@@ -6,6 +6,8 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.komoot.app.R
+import com.komoot.app.lifecycle.RxLifecycleObserver
+import com.komoot.app.lifecycle.RxUI
 import com.komoot.app.realm.RealmHelper
 import com.komoot.app.service.LocationService
 import com.komoot.app.ui.displayToast
@@ -17,10 +19,15 @@ import com.komoot.app.util.LocationTrackerUtil.getLocationPermissions
 import com.komoot.app.util.PermissionsUtils
 import com.komoot.app.util.PermissionsUtils.allPermissionsGranted
 import com.komoot.app.util.PermissionsUtils.getGoToSettingsIntent
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), RxUI {
+
+    private var trackingEventSubscription: Disposable? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -31,6 +38,17 @@ class MainActivity : AppCompatActivity() {
                 false
             )
         setupFloatingActionButton()
+        bindViewToTrackingState()
+        lifecycle.addObserver(RxLifecycleObserver(this))
+    }
+
+    private fun bindViewToTrackingState() {
+        trackingEventSubscription = LocationTrackerUtil.trackingSubject
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { tracking ->
+                setupFloatingActionButton()
+                displayToast(if (tracking) R.string.started_tracking else R.string.stopped_tracking)
+            }
     }
 
     private fun setupFloatingActionButton() {
@@ -42,6 +60,10 @@ class MainActivity : AppCompatActivity() {
         playStopFab?.setOnClickListener {
             if (userHasStartedTracking()) stopTracking() else requestLocationPermissions()
         }
+    }
+
+    override fun disposeSubscriptions() {
+        trackingEventSubscription?.dispose()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -96,14 +118,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun startTracking() {
         LocationTrackerUtil.startTracking(this)
-        displayToast(R.string.started_tracking)
-        setupFloatingActionButtonDrawable()
     }
 
     private fun stopTracking() {
         LocationTrackerUtil.stopTracking(this)
-        displayToast(R.string.stopped_tracking)
-        setupFloatingActionButtonDrawable()
     }
 
     private fun requestLocationPermissions() {
