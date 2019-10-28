@@ -33,7 +33,6 @@ open class BaseFlickrApiClient {
             .baseUrl(flickrBaseUrl)
             .client(okHttpClient)
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
             .addConverterFactory(
                 SimpleXmlConverterFactory.createNonStrict(
                     Persister(AnnotationStrategy())
