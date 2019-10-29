@@ -17,21 +17,23 @@ class FlickrPhotoLocationHandler : LocationServiceHandler {
         location: Location,
         context: Context
     ) {
-        if (!LocationTrackerUtil.hasMilestone(context)) {
-            LocationTrackerUtil.setNewMilestone(
+        if (!SharedPreferenceHelper.hasLastLocationMilestone(context)) {
+            SharedPreferenceHelper.storeLocationMilestone(
                 context,
-                Pair(location.latitude.toFloat(), location.longitude.toFloat())
+                location.latitude.toFloat(),
+                location.longitude.toFloat()
             )
         } else {
-            val lastMilestone = LocationTrackerUtil.getLastMilestone(context)
+            val lastMilestone = SharedPreferenceHelper.getLastLocationMilestone(context)
             if (DistanceUtils.atLeastAHundredMetersBetweenLocations(lastMilestone, location)) {
                 if (NetworkConnectionUtils.isNetworkConnected(context)) {
                     val newMilestoneLatitude = location.latitude.toFloat()
                     val newMilestoneLongitude = location.longitude.toFloat()
                     executeFetchPhotoRequest(newMilestoneLatitude, newMilestoneLongitude)
-                    LocationTrackerUtil.setNewMilestone(
+                    SharedPreferenceHelper.storeLocationMilestone(
                         context,
-                        Pair(newMilestoneLatitude, newMilestoneLongitude)
+                        newMilestoneLatitude,
+                        newMilestoneLongitude
                     )
                 } else {
                     Toast.makeText(context, R.string.no_network, Toast.LENGTH_LONG).show()

@@ -15,6 +15,10 @@ object SharedPreferenceHelper {
     private fun getSharedPreferences(context: Context?) =
         PreferenceManager.getDefaultSharedPreferences(context)
 
+   /*
+    * Milestone: either the start location or the last time 100 meters
+    * were counted
+    */
     fun storeLocationMilestone(
         context: Context?,
         latitude: Float,

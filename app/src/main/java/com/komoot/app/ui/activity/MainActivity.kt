@@ -14,8 +14,8 @@ import com.komoot.app.ui.displayToast
 import com.komoot.app.ui.fragment.MainFragment
 import com.komoot.app.ui.showSnackbar
 import com.komoot.app.ui.switchFragment
-import com.komoot.app.util.LocationTrackerUtil
-import com.komoot.app.util.LocationTrackerUtil.getLocationPermissions
+import com.komoot.app.util.BaseTrackerHelper
+import com.komoot.app.util.LocationTrackerHelper
 import com.komoot.app.util.PermissionsUtils
 import com.komoot.app.util.PermissionsUtils.allPermissionsGranted
 import com.komoot.app.util.PermissionsUtils.getGoToSettingsIntent
@@ -27,6 +27,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity(), RxUI {
 
     private var trackingEventSubscription: Disposable? = null
+
+    private val tracker : BaseTrackerHelper by lazy { LocationTrackerHelper.instance }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +45,7 @@ class MainActivity : AppCompatActivity(), RxUI {
     }
 
     private fun bindViewToTrackingState() {
-        trackingEventSubscription = LocationTrackerUtil.trackingSubject
+        trackingEventSubscription = tracker.trackingObservable
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { tracking ->
                 setupFloatingActionButton()
@@ -102,7 +104,7 @@ class MainActivity : AppCompatActivity(), RxUI {
                 requestLocationPermissions()
 
                 /* Granted */
-            } else if (allPermissionsGranted(this, *getLocationPermissions())) {
+            } else if (allPermissionsGranted(this, *tracker.getLocationPermissions())) {
                 startTracking()
 
                 /* Denied, propose to go to settings */
@@ -117,15 +119,15 @@ class MainActivity : AppCompatActivity(), RxUI {
     }
 
     private fun startTracking() {
-        LocationTrackerUtil.startTracking(this)
+        tracker.startTracking(this)
     }
 
     private fun stopTracking() {
-        LocationTrackerUtil.stopTracking(this)
+        tracker.stopTracking(this)
     }
 
     private fun requestLocationPermissions() {
-        PermissionsUtils.requestPermissions(this, LOCATION_REQUEST_CODE, *getLocationPermissions())
+        PermissionsUtils.requestPermissions(this, LOCATION_REQUEST_CODE, *tracker.getLocationPermissions())
     }
 
     companion object {

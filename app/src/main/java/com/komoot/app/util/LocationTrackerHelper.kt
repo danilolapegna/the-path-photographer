@@ -7,33 +7,16 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import com.komoot.app.service.LocationService
 import com.komoot.app.util.SharedPreferenceHelper.clearLastLocationMilestone
-import com.komoot.app.util.SharedPreferenceHelper.getLastLocationMilestone
-import com.komoot.app.util.SharedPreferenceHelper.hasLastLocationMilestone
-import com.komoot.app.util.SharedPreferenceHelper.storeLocationMilestone
+import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 
+interface BaseTrackerHelper {
 
-object LocationTrackerUtil {
+    val trackingObservable: Observable<Boolean>
 
-    /*
-     * You can subscribe external components to this, when you want to monitor whether the
-     * tracking is in progress. It works as a bus
-     */
-    val trackingSubject: PublishSubject<Boolean> = PublishSubject.create<Boolean>()
+    fun startTracking(context: Context, startService: Boolean = true)
 
-    private val flickrLocationServiceHandler: FlickrPhotoLocationHandler by lazy { FlickrPhotoLocationHandler() }
-
-    /*
-     * Milestone: either the start location or the last time 100 meters
-     * were counted
-     */
-    fun hasMilestone(context: Context?): Boolean = hasLastLocationMilestone(context)
-
-    fun getLastMilestone(context: Context?): Pair<Float, Float> = getLastLocationMilestone(context)
-
-    fun setNewMilestone(context: Context?, latLong: Pair<Float, Float>) {
-        storeLocationMilestone(context, latLong.first, latLong.second)
-    }
+    fun stopTracking(context: Context, stopService: Boolean = true)
 
     fun getLocationPermissions(): Array<String> =
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -48,9 +31,20 @@ object LocationTrackerUtil {
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
             )
         }
+}
 
-    fun startTracking(context: Context, startService: Boolean = true) {
-        trackingSubject.onNext(true)
+class LocationTrackerHelper : BaseTrackerHelper {
+
+    /*
+     * You can subscribe external components to this, when you want to monitor whether the
+     * tracking is in progress. It works as a bus
+     */
+    override val trackingObservable: PublishSubject<Boolean> = PublishSubject.create<Boolean>()
+
+    private val flickrLocationServiceHandler: FlickrPhotoLocationHandler by lazy { FlickrPhotoLocationHandler() }
+
+    override fun startTracking(context: Context, startService: Boolean) {
+        trackingObservable.onNext(true)
         if (startService) {
             LocationService.isStartedOrStarting = true
             LocationService.addHandler(flickrLocationServiceHandler)
@@ -59,8 +53,8 @@ object LocationTrackerUtil {
         }
     }
 
-    fun stopTracking(context: Context, stopService: Boolean = true) {
-        trackingSubject.onNext(false)
+    override fun stopTracking(context: Context, stopService: Boolean) {
+        trackingObservable.onNext(false)
         clearLastLocationMilestone(context)
         if (stopService) {
             LocationService.isStartedOrStarting = false
@@ -72,4 +66,9 @@ object LocationTrackerUtil {
 
     private fun getLocationTrackerServiceIntent(context: Context) =
         Intent(context, LocationService::class.java)
+
+    companion object {
+
+        val instance by lazy { LocationTrackerHelper() }
+    }
 }

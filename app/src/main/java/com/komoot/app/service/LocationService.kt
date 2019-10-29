@@ -17,7 +17,8 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.komoot.app.R
 import com.komoot.app.ui.activity.MainActivity
-import com.komoot.app.util.LocationTrackerUtil
+import com.komoot.app.util.BaseTrackerHelper
+import com.komoot.app.util.LocationTrackerHelper
 import com.komoot.app.util.NotificationUtils.updateNotificationText
 import java.util.concurrent.TimeUnit
 
@@ -27,6 +28,8 @@ class LocationService : Service(),
 
     private var googleApiClient: GoogleApiClient? = null
     private var wakeLock: PowerManager.WakeLock? = null
+
+    private val tracker : BaseTrackerHelper by lazy { LocationTrackerHelper.instance }
 
     private val locationCallback: LocationCallback by lazy { buildLocationCallback() }
 
@@ -74,7 +77,7 @@ class LocationService : Service(),
         val notification = builder.build()
         startForeground(NOTIFICATION_ID, notification)
         googleApiClient?.connect()
-        LocationTrackerUtil.startTracking(this, false)
+        tracker.startTracking(this, false)
         return START_STICKY
     }
 
@@ -86,7 +89,7 @@ class LocationService : Service(),
             wakeLock?.release();
         }
         fusedLocationApiClient.removeLocationUpdates(locationCallback)
-        LocationTrackerUtil.stopTracking(this, false)
+        tracker.stopTracking(this, false)
         super.onDestroy()
     }
 
