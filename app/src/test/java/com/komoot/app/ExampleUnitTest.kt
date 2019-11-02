@@ -1,4 +1,4 @@
-package com.komoot.app
+package com.pathphotographer.app
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

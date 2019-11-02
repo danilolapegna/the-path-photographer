@@ -1,4 +1,4 @@
-package com.komoot.app
+package com.pathphotographer.app
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
@@ -17,6 +17,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.komoot.app", appContext.packageName)
+        assertEquals("com.pathphotographer.app", appContext.packageName)
     }
 }
