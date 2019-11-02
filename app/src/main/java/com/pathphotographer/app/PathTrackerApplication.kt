@@ -22,12 +22,11 @@ class PathTrackerApplication : Application() {
             .builder()
             .applicationModule(ApplicationModule(this))
             .build()
-        applicationComponent.inject(this)
     }
 
     companion object {
 
-        lateinit var applicationComponent: ApplicationComponent
+        private lateinit var applicationComponent: ApplicationComponent
 
         fun getComponent() = applicationComponent
     }

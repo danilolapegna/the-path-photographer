@@ -17,7 +17,7 @@ class RealmHelper {
 
     init {
         PathTrackerApplication
-            .applicationComponent
+            .getComponent()
             .inject(this)
     }
 
