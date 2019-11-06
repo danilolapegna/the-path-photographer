@@ -5,6 +5,7 @@ Using:
 - Location APIs
 - Foreground service
 - RxJava
+- OkHttp + Retrofit for RESTful api calls
 - Realm
 - MVVM
 - Dagger2
