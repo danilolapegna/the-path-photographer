@@ -2,13 +2,16 @@ package com.pathphotographer.app
 
 import android.app.Application
 import com.facebook.drawee.backends.pipeline.Fresco
-import com.pathphotographer.app.di.component.ApplicationComponent
-import com.pathphotographer.app.di.component.DaggerApplicationComponent
+import com.pathphotographer.app.di.component.*
+import com.pathphotographer.app.di.module.ActivityModule
 import com.pathphotographer.app.di.module.ApplicationModule
+import com.pathphotographer.app.di.module.FragmentModule
+import com.pathphotographer.app.di.module.ServiceModule
+import com.pathphotographer.app.service.LocationService
+import com.pathphotographer.app.ui.fragment.MainFragment
 import io.realm.Realm
 
 class PathTrackerApplication : Application() {
-
 
     override fun onCreate() {
         super.onCreate()
@@ -26,8 +29,33 @@ class PathTrackerApplication : Application() {
 
     companion object {
 
-        private lateinit var applicationComponent: ApplicationComponent
+        lateinit var applicationComponent: ApplicationComponent
 
-        fun getComponent() = applicationComponent
+        private var activityComponent: ActivityComponent? = null
+
+        private var fragmentComponent: FragmentComponent? = null
+
+        private var serviceComponent: ServiceComponent? = null
+
+        fun initActivityComponent(): ActivityComponent {
+            if (activityComponent == null) {
+                activityComponent = applicationComponent.plus(ActivityModule())
+            }
+            return activityComponent!!
+        }
+
+        fun initFragmentComponent(fragment: MainFragment): FragmentComponent {
+            if (fragmentComponent == null) {
+                fragmentComponent = applicationComponent.plus(FragmentModule(fragment))
+            }
+            return fragmentComponent!!
+        }
+
+        fun initServiceComponent(service: LocationService): ServiceComponent {
+            if (serviceComponent == null) {
+                serviceComponent = applicationComponent.plus(ServiceModule(service))
+            }
+            return serviceComponent!!
+        }
     }
 }

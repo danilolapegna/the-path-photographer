@@ -28,11 +28,15 @@ object ReactiveNetworkUtils {
             listener.onFailure(e)
         }
 
-        override fun onSubscribe(d: Disposable) {}
+        override fun onSubscribe(subscription: Disposable) {
+            listener.onStart(subscription)
+        }
     }
 }
 
 interface RequestListener<T> {
+
+    fun onStart(subscription: Disposable)
 
     fun onSuccess(response: T)
 

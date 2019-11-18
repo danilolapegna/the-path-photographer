@@ -100,11 +100,19 @@ interface RealmAdapterListener {
 
     fun onDataInAdapterChanged()
 
-    fun onNotifyDataSetChanged() { onDataInAdapterChanged() }
+    fun onNotifyDataSetChanged() {
+        onDataInAdapterChanged()
+    }
 
-    fun onNotifyItemRangeRemoved(startIndex: Int, length: Int) { onDataInAdapterChanged() }
+    fun onNotifyItemRangeRemoved(startIndex: Int, length: Int) {
+        onDataInAdapterChanged()
+    }
 
-    fun onNotifyItemRangeInserted(startIndex: Int, length: Int) { onDataInAdapterChanged() }
+    fun onNotifyItemRangeInserted(startIndex: Int, length: Int) {
+        onDataInAdapterChanged()
+    }
 
-    fun onNotifyItemRangeChanged(startIndex: Int, length: Int) { onDataInAdapterChanged() }
+    fun onNotifyItemRangeChanged(startIndex: Int, length: Int) {
+        onDataInAdapterChanged()
+    }
 }

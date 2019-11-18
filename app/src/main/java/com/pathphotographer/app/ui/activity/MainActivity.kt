@@ -5,9 +5,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.pathphotographer.app.PathTrackerApplication
 import com.pathphotographer.app.R
-import com.pathphotographer.app.di.component.DaggerTrackerUIComponent
-import com.pathphotographer.app.di.module.TrackerContextModule
+import com.pathphotographer.app.di.component.ActivityComponent
+import com.pathphotographer.app.lifecycle.NetworkChangeCallbackUI
+import com.pathphotographer.app.lifecycle.NetworkChangeLifecycleObserver
 import com.pathphotographer.app.lifecycle.RxLifecycleObserver
 import com.pathphotographer.app.lifecycle.RxUI
 import com.pathphotographer.app.realm.RealmHelper
@@ -17,7 +19,9 @@ import com.pathphotographer.app.ui.fragment.UpdatableFragment
 import com.pathphotographer.app.ui.getFragmentInContainer
 import com.pathphotographer.app.ui.showSnackbar
 import com.pathphotographer.app.ui.switchFragment
+import com.pathphotographer.app.util.BaseConnectionStateMonitor
 import com.pathphotographer.app.util.BaseTrackerHelper
+import com.pathphotographer.app.util.ConnectionState
 import com.pathphotographer.app.util.PermissionsUtils
 import com.pathphotographer.app.util.PermissionsUtils.allPermissionsGranted
 import com.pathphotographer.app.util.PermissionsUtils.getGoToSettingsIntent
@@ -27,12 +31,16 @@ import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 
-class MainActivity : AppCompatActivity(), RxUI {
-
-    private var trackingEventSubscription: Disposable? = null
+class MainActivity : AppCompatActivity(), RxUI, NetworkChangeCallbackUI {
 
     @Inject
     lateinit var tracker: BaseTrackerHelper
+
+    @Inject
+    lateinit var networkMonitor: BaseConnectionStateMonitor
+
+    private var component: ActivityComponent? = null
+    private var trackingEventSubscription: Disposable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,14 +55,19 @@ class MainActivity : AppCompatActivity(), RxUI {
         setupFloatingActionButton()
         bindViewToTrackingState()
         lifecycle.addObserver(RxLifecycleObserver(this))
+        lifecycle.addObserver(NetworkChangeLifecycleObserver(this))
+        networkMonitor.enable(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        networkMonitor.disable(this)
+        component = null
     }
 
     private fun initDaggerComponent() {
-        DaggerTrackerUIComponent
-            .builder()
-            .trackerContextModule(TrackerContextModule())
-            .build()
-            .inject(this)
+        component = PathTrackerApplication.initActivityComponent()
+        component?.inject(this)
     }
 
     private fun bindViewToTrackingState() {
@@ -98,6 +111,12 @@ class MainActivity : AppCompatActivity(), RxUI {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onConnectionChange(connectionState: ConnectionState) {
+        runOnUiThread {
+            (getFragmentInContainer() as? UpdatableFragment)?.updateFragmentUI()
         }
     }
 

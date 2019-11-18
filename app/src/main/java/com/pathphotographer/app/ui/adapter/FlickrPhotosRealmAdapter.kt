@@ -7,10 +7,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.pathphotographer.app.R
 import com.pathphotographer.app.realm.RealmFlickrPhoto
 import com.pathphotographer.app.util.DraweeImageLoader
+import com.pathphotographer.app.util.FlickrPhotoLocationHandler
+import com.pathphotographer.app.util.NetworkConnectionUtils
+import com.pathphotographer.app.util.NetworkConnectionUtils.isNetworkConnected
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.item_flickr_photo.view.*
 
-class FlickrPhotosRealmAdapter(data: RealmResults<RealmFlickrPhoto>?, listener: RealmAdapterListener? = null) :
+class FlickrPhotosRealmAdapter(
+    data: RealmResults<RealmFlickrPhoto>?,
+    listener: RealmAdapterListener? = null
+) :
     RealmAdapter<FlickrPhotosRealmViewHolder, RealmFlickrPhoto>(data, listener) {
 
     override fun onBindViewHolder(holder: FlickrPhotosRealmViewHolder, position: Int) {
@@ -28,8 +34,14 @@ class FlickrPhotosRealmAdapter(data: RealmResults<RealmFlickrPhoto>?, listener: 
 class FlickrPhotosRealmViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun populate(photo: RealmFlickrPhoto) {
-        photo.url?.let {
-            DraweeImageLoader.loadImage(it, itemView.flickrPhoto)
+        if (photo.url.isNullOrEmpty() && isNetworkConnected(itemView.context)) {
+            FlickrPhotoLocationHandler().executeFetchPhotoRequest(
+                photo.latitude.toFloat(),
+                photo.longitude.toFloat(),
+                itemView.context,
+                photo.id
+            )
         }
+        DraweeImageLoader.loadImage(photo.url ?: "", itemView.flickrPhoto)
     }
 }

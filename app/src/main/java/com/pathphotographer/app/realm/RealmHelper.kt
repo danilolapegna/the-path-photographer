@@ -3,26 +3,43 @@ package com.pathphotographer.app.realm
 import android.content.Context
 import com.pathphotographer.app.PathTrackerApplication
 import com.pathphotographer.app.model.FlickrPhoto
-import com.pathphotographer.app.realm.FlickrPhotoTransformer.transformApiItem
+import com.pathphotographer.app.realm.FlickrPhotoTransformer.generateRealmItem
+import com.pathphotographer.app.util.ContextConsumer
 import io.realm.Realm
 import io.realm.RealmResults
 import io.realm.Sort
 import java.util.*
 import javax.inject.Inject
 
-class RealmHelper {
+class RealmHelper : ContextConsumer {
 
     @Inject
-    lateinit var applicationContext: Context
+    override lateinit var applicationContext: Context
 
     init {
+        injectDagger()
+    }
+
+    private fun injectDagger() {
         PathTrackerApplication
-            .getComponent()
+            .applicationComponent
             .inject(this)
     }
 
-    fun persistPhoto(requestDate: Date, photo: FlickrPhoto) {
-        val realmObject = transformApiItem(requestDate, photo, applicationContext)
+    /*
+     * photo: if it's a new item from api
+     * previousItemId: if it's an already existing item (eg. no network) from api
+     * No photo, no previousItemId: if it's a new no network item
+     */
+    fun persistPhotoItem(
+        requestDate: Date,
+        lat: Double,
+        lon: Double,
+        photo: FlickrPhoto? = null,
+        previousItemId: String? = null
+    ) {
+        val realmObject =
+            generateRealmItem(requestDate, applicationContext, lat, lon, photo, previousItemId)
         getRealm().executeTransaction {
             it.insertOrUpdate(realmObject)
         }
@@ -43,6 +60,6 @@ class RealmHelper {
 
         private const val FETCHED_AT_FIELD = "fetchedAt"
 
-        val instance = RealmHelper()
+        val instance by lazy { RealmHelper() }
     }
 }

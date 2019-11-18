@@ -11,7 +11,7 @@ import com.pathphotographer.app.R
 
 object DraweeImageLoader {
 
-    fun loadImage(url: String, draweeView: SimpleDraweeView) {
+    fun loadImage(url: String?, draweeView: SimpleDraweeView) {
         val draweeBuilder = GenericDraweeHierarchyBuilder(draweeView.resources)
 
         val requestBuilder = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
@@ -27,7 +27,14 @@ object DraweeImageLoader {
 
         draweeView.hierarchy =
             draweeBuilder.build().also {
-                it.setPlaceholderImage(R.drawable.ic_camera_placeholder, ScalingUtils.ScaleType.CENTER_INSIDE)
+                it.setPlaceholderImage(
+                    R.drawable.ic_camera_placeholder,
+                    ScalingUtils.ScaleType.CENTER_INSIDE
+                )
+                it.setFailureImage(
+                    R.drawable.ic_camera_placeholder,
+                    ScalingUtils.ScaleType.CENTER_INSIDE
+                )
             }
 
         draweeView.controller = controller.build()

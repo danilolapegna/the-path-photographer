@@ -5,14 +5,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.pathphotographer.app.PathTrackerApplication
 import com.pathphotographer.app.R
-import com.pathphotographer.app.di.component.DaggerTrackerUIComponent
-import com.pathphotographer.app.di.module.TrackerContextModule
+import com.pathphotographer.app.di.component.FragmentComponent
+import com.pathphotographer.app.realm.RealmFlickrPhoto
 import com.pathphotographer.app.ui.adapter.FlickrPhotosRealmAdapter
 import com.pathphotographer.app.ui.adapter.RealmAdapterListener
 import com.pathphotographer.app.util.BaseTrackerHelper
+import com.pathphotographer.app.util.FlickrPhotoLocationHandler
+import com.pathphotographer.app.util.NetworkConnectionUtils
+import com.pathphotographer.app.util.NetworkConnectionUtils.isNetworkConnected
 import com.pathphotographer.app.viewmodel.FlickrPhotosViewModel
 import kotlinx.android.synthetic.main.fragment_main.*
 import javax.inject.Inject
@@ -24,12 +27,14 @@ class MainFragment : Fragment(),
     @Inject
     lateinit var tracker: BaseTrackerHelper
 
-    private lateinit var photosViewModel: FlickrPhotosViewModel
+    @Inject
+    lateinit var photosViewModel: FlickrPhotosViewModel
+
+    private var component: FragmentComponent? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initDaggerComponent()
-        photosViewModel = ViewModelProvider(this).get(FlickrPhotosViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -41,11 +46,13 @@ class MainFragment : Fragment(),
     }
 
     private fun initDaggerComponent() {
-        DaggerTrackerUIComponent
-            .builder()
-            .trackerContextModule(TrackerContextModule())
-            .build()
-            .inject(this)
+        component = PathTrackerApplication.initFragmentComponent(this)
+        component?.inject(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        component = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -79,6 +86,22 @@ class MainFragment : Fragment(),
 
     override fun updateFragmentUI() {
         setupEmptyView()
+        checkPendingElementsToFetch()
+    }
+
+    private fun checkPendingElementsToFetch() {
+        photosViewModel.photos?.forEach { checkIfShouldFetch(it) }
+    }
+
+    private fun checkIfShouldFetch(photo: RealmFlickrPhoto) {
+        if (photo.url.isNullOrEmpty() && isNetworkConnected(context)) {
+            FlickrPhotoLocationHandler().executeFetchPhotoRequest(
+                photo.latitude.toFloat(),
+                photo.longitude.toFloat(),
+                context,
+                photo.id
+            )
+        }
     }
 
     private fun setupEmptyView() {

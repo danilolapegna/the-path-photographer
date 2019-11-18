@@ -3,21 +3,27 @@ package com.pathphotographer.app.realm
 import android.content.Context
 import com.pathphotographer.app.R
 import com.pathphotographer.app.model.FlickrPhoto
+import com.pathphotographer.app.util.IdUtils.generateId
 import java.util.*
 
 object FlickrPhotoTransformer {
 
-    fun transformApiItem(
+    fun generateRealmItem(
         requestTime: Date,
-        flickrPhoto: FlickrPhoto,
-        context: Context?
+        context: Context?,
+        lat: Double,
+        lon: Double,
+        flickrPhoto: FlickrPhoto?,
+        previousItemId: String? = null
     ): RealmFlickrPhoto {
         return RealmFlickrPhoto().apply {
-            id = flickrPhoto.id
-            url = generatePhotoUrlForPhoto(
-                flickrPhoto,
-                context
-            )
+            id = previousItemId ?: generateId()
+            flickrPhoto?.let {
+                photoId = it.id
+                url = generatePhotoUrlForPhoto(it, context)
+                latitude = lat
+                longitude = lon
+            }
             fetchedAt = requestTime
         }
     }
